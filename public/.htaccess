@@ -17,9 +17,11 @@
 # move — not a 404 — and the paths line up one to one.
 <IfModule mod_alias.c>
   RedirectMatch 301 ^/(docs|community)(/.*)?$ https://docs.expressive-tea.io/$1$2
-  # The old site also published /license and /privacy-policy, which exist on the subdomain
-  # too. Uncomment to forward them as well:
-  # RedirectMatch 301 ^/(license|privacy-policy)(/.*)?$ https://docs.expressive-tea.io/$1$2
+  # /privacy-policy is deliberately absent from that list: the old apex published one, and
+  # this site publishes its own at the same URL, so the link keeps working and lands on a
+  # page that is actually true of this site. Forwarding it would shadow ours.
+  # /license is still undecided — the old apex had one and the subdomain still does:
+  # RedirectMatch 301 ^/license(/.*)?$ https://docs.expressive-tea.io/license$1
 </IfModule>
 
 ErrorDocument 404 /404.html

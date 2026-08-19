@@ -133,6 +133,12 @@ section {
   padding-block: clamp(3rem, 7vw, 5.5rem);
 }
 
+/* Long-form text needs a line-length cap, but capping the container centres it inside .wrap
+   and knocks the page's left edge out of alignment. Cap the children. */
+.measure > * {
+  max-width: 68ch;
+}
+
 .kicker {
   display: inline-block;
   font-size: 0.78rem;

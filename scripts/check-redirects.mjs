@@ -34,6 +34,8 @@ const cases = [
   ['/404.html', null],
   ['/documentation', null],
   ['/docsearch', null],
+  // This site serves its own, and it must not be shadowed by a redirect to the subdomain.
+  ['/privacy-policy', null],
 ];
 
 for (const [path, expected] of cases) {

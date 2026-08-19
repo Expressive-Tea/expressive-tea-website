@@ -1,0 +1,112 @@
+---
+import Base from '../layouts/Base.astro';
+
+const title = 'Privacy policy — Expressive Tea Software';
+const description =
+  'What expressive-tea.io collects: no cookies, no analytics, no third-party requests. Only the access logs our web server keeps to run and protect the site.';
+
+// Kept as a date, not a string, so the machine-readable and the human-readable
+// versions of "when this changed" cannot drift apart.
+const effective = new Date('2026-08-19T00:00:00Z');
+const effectiveLabel = effective.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<Base title={title} description={description}>
+  <section>
+    <div class="wrap measure policy">
+      <p class="kicker">Legal</p>
+      <h1>Privacy policy</h1>
+      <p class="lede">
+        Effective <time datetime={effective.toISOString().slice(0, 10)}>{effectiveLabel}</time>.
+        This page describes <strong>expressive-tea.io</strong> — this site and nothing else.
+      </p>
+
+      <p>
+        Expressive Tea Software is an open-source project based in Mexico. We publish
+        frameworks; we do not run a service, sell anything, or keep accounts. This page says
+        exactly what happens when you load this site, and nothing that does not happen.
+      </p>
+
+      <h2>What this site collects: nothing</h2>
+      <p>
+        These pages are static files. They set no cookies, read and write nothing on your
+        device, and run no analytics. Loading a page makes no request to any other company:
+        the fonts are served from this domain rather than a font CDN, and there are no
+        embedded scripts, trackers, pixels, widgets, or embedded media.
+      </p>
+      <p>
+        Because nothing is stored on your device, there is nothing to consent to, which is why
+        this site shows no cookie banner.
+      </p>
+
+      <h2>What our web server records</h2>
+      <p>
+        Like every web server, ours writes an access log for each request: your IP address, the
+        date and time, the page requested, the referring page if your browser sends one, and
+        your browser's user-agent string. An IP address can identify a person, so we treat
+        these logs as personal data.
+      </p>
+      <p>
+        We use them only to operate the site and to investigate abuse or faults — never to
+        build a profile, and never to identify individual visitors. They are held on our
+        hosting provider's servers, are not combined with anything else, and are not sold,
+        rented, or shared. Under the GDPR our lawful basis is legitimate interest
+        (Article 6(1)(f)): running a website securely is not possible without them.
+      </p>
+
+      <h2>Links to other sites</h2>
+      <p>
+        This page links to GitHub, npm, and our documentation subdomains. Your browser contacts
+        them only if you click, and once you do you are on their site under their privacy
+        policy, not ours.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        Under the GDPR you may request access to your personal data, its correction or
+        erasure, restriction of or objection to its processing, and you may complain to your
+        national supervisory authority. Under Mexico's LFPDPPP you hold the ARCO rights —
+        acceso, rectificación, cancelación y oposición.
+      </p>
+      <p>
+        In practice the only data we hold about a visitor is a log line. To ask about it, write
+        to <a href="mailto:support@expressive-tea.io">support@expressive-tea.io</a> with enough
+        detail to locate the entry — roughly when you visited, and from which IP address.
+      </p>
+
+      <h2>If this changes</h2>
+      <p>
+        If we ever add analytics, it will be a cookieless one that does not collect personal
+        data, and this page will say so before it ships. Any change is reflected in the
+        effective date at the top.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Expressive Tea Software ·
+        <a href="mailto:support@expressive-tea.io">support@expressive-tea.io</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .policy h2 {
+    font-size: 1.3rem;
+    margin-top: 2.2em;
+  }
+
+  .policy p {
+    color: var(--cool);
+  }
+
+  .policy .lede,
+  .policy strong {
+    color: var(--white);
+  }
+</style>
