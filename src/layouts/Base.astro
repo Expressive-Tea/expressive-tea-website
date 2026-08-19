@@ -25,6 +25,14 @@ const serializedStructuredData = structuredData
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="canonical" href={canonicalURL} />
+    <!-- Every page advertises the feed, not just /blog. A reader who pastes any URL into a
+         feed reader gets subscribed rather than a shrug. -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Expressive Tea Software"
+      href="/rss.xml"
+    />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />

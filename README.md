@@ -31,6 +31,25 @@ Every colour, font and asset here traces back to
   (the 363 KB master with its fonts embedded) onto a 1200×630 graphite canvas. It is a
   committed artefact, not a build step — regenerate it only if the lockup changes.
 
+## Content
+
+Two kinds of page, and the difference is the voice.
+
+- **`/releases`** pulls the notes from the GitHub API at build time and renders GitHub's own
+  HTML — which is why no Markdown library is a dependency here. The support policy above each
+  list is written in `src/pages/releases.astro`, because GitHub knows tags, not intent.
+- **`/blog`** is release press, written as the organization. Posts are Markdown in
+  `src/content/blog/`, schema in `src/content.config.ts`. `draft: true` keeps a post out of the
+  build entirely, and a filename starting with `_` keeps it out of the collection.
+
+There is no `author` field on purpose. The first-person writing — the story of building the
+thing, with a name on it — belongs on the project sites, and green-tea-site already holds
+Green Tea's. A post that wants a byline is a post for the other blog.
+
+Dates are formatted in UTC everywhere. A date-only front-matter value parses as UTC midnight,
+so formatting it in the builder's zone renders it a day early west of Greenwich — and makes
+the same commit build differently on a laptop than in CI.
+
 ## Deploy
 
 cPanel shared hosting, manual, from your own machine:

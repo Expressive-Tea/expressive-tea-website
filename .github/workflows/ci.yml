@@ -46,3 +46,11 @@ jobs:
           bare=$(grep -o 'was published without notes' dist/releases/index.html | wc -l)
           echo "$tags releases rendered, $bare of them without notes"
           test "$tags" -ge 1 && test "$bare" -lt "$tags"
+      # A draft must never become a public URL, and the filter that guarantees it is written
+      # out three times — the index, the post route and the feed. Two of them agreeing is not
+      # enough: the one that drifts is the one that publishes the draft.
+      - name: Verify drafts are filtered in every place that lists posts
+        run: |
+          for f in src/pages/blog/index.astro 'src/pages/blog/[...slug].astro' src/pages/rss.xml.js; do
+            grep -q '!data.draft' "$f" || { echo "missing draft filter: $f"; exit 1; }
+          done

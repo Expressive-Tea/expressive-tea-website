@@ -1,0 +1,133 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const title = 'Blog — Expressive Tea Software';
+const description =
+  'Release announcements and organization news from Expressive Tea Software, publishers of Green Tea and Expressive Tea.';
+
+// Drafts are excluded from the build, not hidden with CSS: an unlisted page is still a
+// public URL, and "unreleased" is exactly the thing that must not be one.
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const subjects = {
+  'green-tea': 'Green Tea',
+  'expressive-tea': 'Expressive Tea',
+  organization: 'Organization',
+};
+// Formatted in UTC, not in the builder's zone. A date-only front-matter value parses as
+// UTC midnight, so any negative offset renders it a day early — and worse, the same commit
+// would produce different HTML on a laptop in CST than in CI, which runs in UTC.
+const fmt = new Intl.DateTimeFormat('en', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<Base title={title} description={description}>
+  <section class="wrap blog-head">
+    <p class="kicker">Blog</p>
+    <h1>Releases, announced.</h1>
+    <div class="rule"></div>
+    <div class="measure">
+      <p class="lede">
+        What we ship and why it matters, written as the organization. The people who build
+        these frameworks write in their own voice on the project sites.
+      </p>
+      <p class="blog-head__feed">
+        <a href="/rss.xml">RSS feed</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap blog-list-section">
+    {
+      posts.length === 0 ? (
+        <p class="blog-empty">Nothing published yet.</p>
+      ) : (
+        <ol class="blog-list">
+          {posts.map((post) => (
+            <li class="post-card">
+              <div class="post-card__meta">
+                <span class="chip">{subjects[post.data.subject]}</span>
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {fmt.format(post.data.pubDate)}
+                </time>
+              </div>
+              <h2>
+                <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+              </h2>
+              <p>{post.data.description}</p>
+            </li>
+          ))}
+        </ol>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .blog-head {
+    padding-block: 4rem 1rem;
+  }
+  .blog-head h1 {
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    line-height: 1.15;
+    margin: 0.35rem 0 1.1rem;
+  }
+  .blog-head__feed {
+    font-size: 0.95rem;
+  }
+  .blog-list-section {
+    padding-block: 1rem 4rem;
+  }
+  .blog-empty {
+    color: var(--meta);
+  }
+  .blog-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .post-card {
+    padding-block: 2rem;
+    border-top: 1px solid var(--line);
+    max-width: 68ch;
+  }
+  .post-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    color: var(--meta);
+    font-size: 0.9rem;
+  }
+  .chip {
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .post-card h2 {
+    font-size: 1.35rem;
+    margin: 0.6rem 0 0.5rem;
+  }
+  .post-card h2 a {
+    color: var(--white);
+    text-decoration: none;
+  }
+  .post-card h2 a:hover,
+  .post-card h2 a:focus-visible {
+    color: var(--green);
+  }
+  .post-card p {
+    color: var(--cool);
+    margin: 0;
+  }
+</style>

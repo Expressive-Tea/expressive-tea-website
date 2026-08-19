@@ -67,7 +67,15 @@ const sections = await Promise.all(
   }),
 );
 
-const fmt = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric' });
+// Formatted in UTC, not in the builder's zone. A date-only front-matter value parses as
+// UTC midnight, so any negative offset renders it a day early — and worse, the same commit
+// would produce different HTML on a laptop in CST than in CI, which runs in UTC.
+const fmt = new Intl.DateTimeFormat('en', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
 ---
 
 <Base title={title} description={description}>

@@ -1,0 +1,143 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const subjects = {
+  'green-tea': 'Green Tea',
+  'expressive-tea': 'Expressive Tea',
+  organization: 'Organization',
+};
+// Formatted in UTC, not in the builder's zone. A date-only front-matter value parses as
+// UTC midnight, so any negative offset renders it a day early — and worse, the same commit
+// would produce different HTML on a laptop in CST than in CI, which runs in UTC.
+const fmt = new Intl.DateTimeFormat('en', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+// The organization is the author. There is no byline because there is no person claimed —
+// see src/content.config.ts for why that is a rule rather than an omission.
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  author: { '@type': 'Organization', name: 'Expressive Tea Software' },
+  publisher: { '@type': 'Organization', name: 'Expressive Tea Software' },
+  mainEntityOfPage: new URL(`/blog/${post.id}/`, Astro.site).toString(),
+};
+---
+
+<Base
+  title={`${post.data.title} — Expressive Tea Software`}
+  description={post.data.description}
+  structuredData={structuredData}
+>
+  <article class="wrap post">
+    <p class="kicker">{subjects[post.data.subject]}</p>
+    <h1>{post.data.title}</h1>
+    <p class="post__meta">
+      <time datetime={post.data.pubDate.toISOString()}>{fmt.format(post.data.pubDate)}</time>
+      {
+        post.data.updatedDate && (
+          <>
+            {' · updated '}
+            <time datetime={post.data.updatedDate.toISOString()}>
+              {fmt.format(post.data.updatedDate)}
+            </time>
+          </>
+        )
+      }
+    </p>
+    <div class="rule"></div>
+    <div class="post__body">
+      <Content />
+    </div>
+    <p class="post__back"><a href="/blog">← All posts</a></p>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding-block: 4rem;
+  }
+  .post h1 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    line-height: 1.2;
+    margin: 0.35rem 0 0.6rem;
+    max-width: 24ch;
+  }
+  .post__meta {
+    color: var(--meta);
+    font-size: 0.92rem;
+    margin: 0 0 1rem;
+  }
+  .post__body {
+    max-width: 68ch;
+    color: var(--cool);
+  }
+  .post__body :global(h2) {
+    font-size: 1.4rem;
+    color: var(--white);
+    margin: 2.2rem 0 0.7rem;
+  }
+  .post__body :global(h3) {
+    font-size: 1.1rem;
+    color: var(--white);
+    margin: 1.8rem 0 0.5rem;
+  }
+  .post__body :global(p),
+  .post__body :global(ul),
+  .post__body :global(ol) {
+    margin: 0.9rem 0;
+  }
+  .post__body :global(li) {
+    margin: 0.35rem 0;
+  }
+  .post__body :global(code) {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  .post__body :global(pre) {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+  }
+  .post__body :global(pre code) {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+  .post__body :global(blockquote) {
+    margin: 1rem 0;
+    padding-left: 0.9rem;
+    border-left: 3px solid var(--line);
+    color: var(--meta);
+  }
+  .post__body :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+  .post__back {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+</style>
