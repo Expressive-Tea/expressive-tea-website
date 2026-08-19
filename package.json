@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "check": "npm test && npm run build",
     "test": "node scripts/check-redirects.mjs",
+    "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {

@@ -1,0 +1,30 @@
+name: CI
+
+# Build gate. Runs on both forges (the .github path is read by Gitea and GitHub).
+# Deliberately holds no secrets: nothing here talks to the server, so a fork or a
+# pull request can run it without touching anything that can be lost.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+      - run: npm run check
+      # The .htaccess is the only file here that can break URLs older than the site,
+      # and it is the one file a build cannot check by rendering. It ships inside
+      # dist/ or the redirects silently stop existing.
+      - name: Verify .htaccess ships in the build
+        run: test -f dist/.htaccess
