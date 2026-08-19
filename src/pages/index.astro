@@ -1,0 +1,279 @@
+---
+import Base from '../layouts/Base.astro';
+import markUrl from '../assets/logo-mark.svg?url';
+
+const title = 'Expressive Tea Software — open-source TypeScript frameworks';
+const description =
+  'Expressive Tea Software builds open-source TypeScript backend frameworks: Green Tea, a type-safe graph-pipeline framework, and Expressive Tea, the decorator-driven framework on Express. Open source, built in Mexico.';
+
+// The frameworks are projects of the organization, never alternate names for it.
+// Green Tea leads because it is where the work happens; Expressive Tea is in maintenance.
+const frameworks = [
+  {
+    name: 'Green Tea',
+    status: 'beta · actively developed',
+    accent: 'green',
+    pitch: 'A zen, opinionated, type-safe framework — your API is a graph, not a middleware chain.',
+    body:
+      'You declare what each step needs and provides; the framework computes the order, type-checks the wiring, and can print the whole request before it runs. A handler that reads ctx.user will not compile if no step produces user — so "it was undefined in prod" disappears at compile time.',
+    points: [
+      'The pipeline is a graph, not a chain — no positional ordering, each route runs only its slice.',
+      'You can see the request — app.explain(), a live /__graph__ diagram, and an OpenAPI 3.1 projection from the same metadata.',
+      'Real-time as a primitive — SSE, ndjson, or WebSocket duplex; return an AsyncIterable and backpressure is handled.',
+      'Runs everywhere — the same app on Node, Deno, Bun and the edge; swap the entry point, nothing else.',
+    ],
+    links: [
+      { label: 'Site', href: 'https://green-tea.expressive-tea.io', primary: true },
+      { label: 'Docs', href: 'https://green-tea.expressive-tea.io/docs' },
+      { label: 'GitHub', href: 'https://github.com/Expressive-Tea/green-tea' },
+    ],
+  },
+  {
+    name: 'Expressive Tea',
+    status: 'stable · maintenance',
+    accent: 'blue',
+    pitch: 'Decorator-driven framework on Express — clean architecture, dependency injection, zero boilerplate.',
+    body:
+      'Declare routes, modules and middleware with decorators that do exactly what they say. Dependency injection is module-scoped and auto-wired; compose your app from mountable modules with their own controllers and providers.',
+    points: [
+      'Decorator-first — @Route, @Get, @Module; metadata over wiring.',
+      'Dependency injection — powered by InversifyJS, module-scoped.',
+      'Type-safe and production-ready — TypeScript-first, built for strict mode.',
+    ],
+    links: [
+      { label: 'Docs', href: 'https://docs.expressive-tea.io', primary: true },
+      { label: 'GitHub', href: 'https://github.com/Expressive-Tea/expresive-tea' },
+      { label: 'npm', href: 'https://www.npmjs.com/package/@expressive-tea/core' },
+    ],
+  },
+];
+
+const canonicalURL = new URL('/', Astro.site).toString();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${canonicalURL}#organization`,
+  name: 'Expressive Tea Software',
+  url: canonicalURL,
+  description,
+  logo: new URL('/apple-touch-icon.png', Astro.site).toString(),
+  sameAs: ['https://github.com/Expressive-Tea', 'https://www.npmjs.com/org/green-tea'],
+};
+---
+
+<Base title={title} description={description} structuredData={structuredData}>
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <img class="hero__mark" src={markUrl} alt="" width="1024" height="1024" />
+      <h1>Open-source TypeScript frameworks.</h1>
+      <p class="lede">
+        <strong>Tea = the T of TypeScript.</strong> We build frameworks that are type-safe, honest
+        about what your code does, and a pleasure to read. No hype — calm, precise tools.
+      </p>
+      <p class="hero__descriptor">Open source, built in Mexico.</p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="#frameworks">Our frameworks</a>
+        <a class="btn btn--ghost" href="https://github.com/Expressive-Tea" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="frameworks" class="frameworks">
+    <div class="wrap">
+      <p class="kicker">Our frameworks</p>
+      <h2>Two frameworks, one idea.</h2>
+
+      <div class="cards">
+        {
+          frameworks.map((framework) => (
+            <article class:list={['card', `card--${framework.accent}`]}>
+              <div class="rule" aria-hidden="true" />
+              <div class="card__body">
+                <div class="card__head">
+                  <h3>{framework.name}</h3>
+                  <span class="badge">{framework.status}</span>
+                </div>
+                <p class="card__pitch">{framework.pitch}</p>
+                <p class="card__text">{framework.body}</p>
+                <ul>
+                  {framework.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+                <div class="btn-row">
+                  {framework.links.map((link) => (
+                    <a
+                      class:list={['btn', link.primary ? 'btn--primary' : 'btn--ghost']}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="why">
+    <div class="wrap why__inner">
+      <div>
+        <p class="kicker">Why "Tea"?</p>
+        <h2>Same family, same values.</h2>
+      </div>
+      <div class="why__text">
+        <p>
+          <strong>Expressive Tea</strong> = <strong>Express</strong> + TypeScript. A decorator does
+          exactly what it says — zero repetition, shareable modules and plugins.
+        </p>
+        <p>
+          <strong>Green Tea</strong> = <strong>green</strong>, the colour of calm, plus the same <strong>T</strong>.
+          Everything in-house; the pipeline is a graph, not a middleware chain.
+        </p>
+        <p>Type safety you can read, and tools that are honest about what they do.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    border-bottom: 1px solid var(--line);
+    /* The green–teal–blue accents of the cup, dissolved behind the lockup. */
+    background:
+      radial-gradient(60rem 30rem at 12% -10%, color-mix(in srgb, var(--green) 12%, transparent), transparent 70%),
+      radial-gradient(50rem 28rem at 88% 0%, color-mix(in srgb, var(--blue) 14%, transparent), transparent 70%);
+  }
+
+  .hero__inner h1 {
+    max-width: 18ch;
+  }
+
+  .hero__mark {
+    display: block;
+    width: clamp(4.5rem, 10vw, 6.5rem);
+    height: auto;
+    margin-bottom: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .hero__descriptor {
+    color: var(--meta);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .cards {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .card {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .card--blue .rule {
+    background: linear-gradient(180deg, var(--teal), var(--blue));
+  }
+
+  .card__body {
+    min-width: 0;
+  }
+
+  .card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card__head h3 {
+    margin: 0;
+  }
+
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0.7em;
+    border-radius: 999px;
+  }
+
+  /* Project badge colours are fixed by the brand guide. */
+  .card--green .badge {
+    background: #d3efe1;
+    color: #123528;
+  }
+
+  .card--blue .badge {
+    background: #e6efff;
+    color: #003a99;
+  }
+
+  .card__pitch {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.8em;
+  }
+
+  .card__text {
+    color: var(--cool);
+  }
+
+  .card ul {
+    margin: 0 0 1.5em;
+    padding-left: 1.1em;
+    color: var(--cool);
+  }
+
+  .card li {
+    margin-bottom: 0.5em;
+  }
+
+  .why {
+    border-top: 1px solid var(--line);
+  }
+
+  .why__inner {
+    display: grid;
+    gap: 1.5rem clamp(2rem, 6vw, 5rem);
+  }
+
+  .why__text {
+    max-width: 62ch;
+    color: var(--cool);
+  }
+
+  .why__text strong {
+    color: var(--white);
+  }
+
+  @media (min-width: 820px) {
+    .why__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .card {
+      gap: 1rem;
+    }
+  }
+</style>

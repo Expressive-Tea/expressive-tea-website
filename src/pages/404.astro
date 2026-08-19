@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Page not found — Expressive Tea Software"
+  description="That page is not here."
+  robots="noindex, follow"
+>
+  <section>
+    <div class="wrap not-found">
+      <p class="kicker">404</p>
+      <h1>That page is not here.</h1>
+      <p class="lede">
+        This domain used to serve the Expressive Tea documentation. It now lives on its own
+        subdomain — the old <code>/docs</code> and <code>/community</code> links redirect there
+        automatically.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="/">Home</a>
+        <a class="btn btn--ghost" href="https://docs.expressive-tea.io">Expressive Tea docs</a>
+        <a class="btn btn--ghost" href="https://green-tea.expressive-tea.io">Green Tea</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* .lede caps the line length; capping the block itself would centre it inside .wrap and
+     leave the 404 sitting further right than every other page. */
+  .not-found {
+    padding-block: clamp(1rem, 6vw, 4rem);
+  }
+
+  code {
+    background: var(--panel);
+    border-radius: 4px;
+    padding: 0.15em 0.4em;
+    font-size: 0.9em;
+  }
+</style>

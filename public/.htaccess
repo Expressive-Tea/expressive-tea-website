@@ -1,0 +1,74 @@
+# expressive-tea.io — the organization front page.
+#
+# This file ships inside dist/ and is unpacked into the apex docroot. cPanel writes a
+# "# php -- BEGIN cPanel-generated handler, do not edit" block into the apex .htaccess;
+# it is not reproduced here because cPanel owns it. When deploying, keep that block:
+# append it back after unpacking, or unpack and then re-save the PHP version in cPanel.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://expressive-tea.io%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# Until 2026 this domain served the Docusaurus documentation from its web root, after a
+# WordPress failure on docs.expressive-tea.io was patched by moving the docs to the apex.
+# The docs are back on their own subdomain, so every path they used to own is a permanent
+# move — not a 404 — and the paths line up one to one.
+<IfModule mod_alias.c>
+  RedirectMatch 301 ^/(docs|community)(/.*)?$ https://docs.expressive-tea.io/$1$2
+  # The old site also published /license and /privacy-policy, which exist on the subdomain
+  # too. Uncomment to forward them as well:
+  # RedirectMatch 301 ^/(license|privacy-policy)(/.*)?$ https://docs.expressive-tea.io/$1$2
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# Directories without an index (e.g. /_astro/) answer 403 by default, which says "there is
+# something here you may not see" about a path that simply has no page.
+Options -Indexes
+ErrorDocument 403 /404.html
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType text/javascript "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/avif "access plus 7 days"
+  ExpiresByType image/gif "access plus 7 days"
+  ExpiresByType image/jpeg "access plus 7 days"
+  ExpiresByType image/png "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 7 days"
+  ExpiresByType image/webp "access plus 7 days"
+  ExpiresByType image/x-icon "access plus 7 days"
+
+  <FilesMatch "\.[A-Za-z0-9_-]{8,}\.(?:avif|css|eot|gif|ico|jpe?g|js|mjs|otf|png|svg|ttf|webp|woff2?)$">
+    ExpiresActive Off
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.html?$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
+
+  <FilesMatch "\.(?:avif|gif|ico|jpe?g|png|svg|webp)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+
+  <FilesMatch "\.[A-Za-z0-9_-]{8,}\.(?:avif|css|eot|gif|ico|jpe?g|js|mjs|otf|png|svg|ttf|webp|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json application/ld+json
+  AddOutputFilterByType DEFLATE application/xml application/xhtml+xml application/rss+xml application/atom+xml image/svg+xml
+</IfModule>

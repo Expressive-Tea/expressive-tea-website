@@ -1,0 +1,114 @@
+---
+import markUrl from '../assets/logo-mark.svg?url';
+
+const navLinks = [
+  { label: 'Frameworks', href: '/#frameworks', external: false, anchor: true },
+  { label: 'GitHub', href: 'https://github.com/Expressive-Tea', external: true },
+];
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="/" aria-label="Expressive Tea Software — home">
+      <img src={markUrl} alt="" width="28" height="28" />
+      <span class="wordmark">
+        <span>Expressive Tea</span><span class="wordmark__software">Software</span>
+      </span>
+    </a>
+
+    <nav aria-label="Primary">
+      <ul>
+        {
+          navLinks.map((link) => (
+            <li class:list={[link.anchor && 'nav__anchor']}>
+              <a
+                href={link.href}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener noreferrer' : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--graphite) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: 0.9rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .brand:hover,
+  .brand:focus-visible {
+    text-decoration: none;
+  }
+
+  .brand img {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+  }
+
+  .brand .wordmark {
+    font-size: 1.05rem;
+  }
+
+  nav ul {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav a {
+    color: var(--cool);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  nav a:hover,
+  nav a:focus-visible {
+    color: var(--green);
+    text-decoration: none;
+  }
+
+  @media (max-width: 520px) {
+    /* The wordmark is the organization's name; it breaks meaning when it wraps. What gives
+       way instead is the same-page anchor, which a phone reaches by scrolling anyway. */
+    .nav__anchor {
+      display: none;
+    }
+
+    .brand .wordmark {
+      font-size: 0.95rem;
+    }
+
+    nav ul {
+      gap: 1rem;
+    }
+  }
+</style>

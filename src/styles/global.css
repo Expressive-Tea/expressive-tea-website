@@ -1,0 +1,230 @@
+/* Expressive Tea Software — organization front page.
+   Tokens come from rebranding/docs/brand-guide.md. Matcha and violet are Green
+   Tea's alone and must not appear here: this is the organization, not a project. */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/zen-maru-gothic-latin-700-normal.woff2') format('woff2');
+}
+
+:root {
+  /* Accents sampled from the canonical cup, in the order the cup reads them. */
+  --green: #00d084;
+  --teal: #00a1ba;
+  --blue: #0066ff;
+
+  /* Support colours. --panel and --line are the guide's grid at the stated 50%. */
+  --graphite: #0d1117;
+  --panel: color-mix(in srgb, #1a2a3c 50%, #0d1117);
+  --line: color-mix(in srgb, #1a2a3c 70%, transparent);
+  --white: #f8fafc;
+  --cool: #b8c2d1;
+  --meta: #465568;
+
+  --font-body:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+
+  --max-width: 1080px;
+  --gutter: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--graphite);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(2.1rem, 4.5vw, 3.1rem);
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+h3 {
+  font-size: 1.3rem;
+}
+
+p {
+  margin: 0 0 1.2em;
+}
+
+a {
+  color: var(--green);
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+}
+
+a:hover,
+a:focus-visible {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--graphite);
+}
+
+.wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+section {
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+}
+
+.kicker {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cool);
+  margin: 0 0 0.9em;
+}
+
+.lede {
+  color: var(--cool);
+  font-size: 1.1rem;
+  max-width: 62ch;
+}
+
+/* The organization's signature: the green–teal–blue rule from the editorial system. */
+.rule {
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--green), var(--teal), var(--blue));
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.7em 1.35em;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  line-height: 1.2;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  text-decoration: none;
+}
+
+.btn--primary {
+  background: var(--green);
+  color: var(--graphite);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background: color-mix(in srgb, var(--green) 82%, var(--white));
+  color: var(--graphite);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--white);
+}
+
+.btn--ghost:hover,
+.btn--ghost:focus-visible {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* The organization wordmark, per the brand guide: Inter 700 for "Expressive Tea",
+   Zen Maru Gothic 700 for "SOFTWARE". */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.42em;
+  white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--white);
+}
+
+.wordmark__software {
+  font-family: 'Zen Maru Gothic', var(--font-body);
+  font-weight: 700;
+  font-size: 0.72em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* Teal, the same colour "SOFTWARE" takes in the canonical lockup. */
+  color: var(--teal);
+}
