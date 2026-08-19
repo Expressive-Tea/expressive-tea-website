@@ -55,9 +55,22 @@ the same commit build differently on a laptop than in CI.
 cPanel shared hosting, manual, from your own machine:
 
 ```bash
-npm run deploy              # test + build + subir
-node scripts/deploy.mjs --dry-run   # imprime el batch sin conectarse
+DEPLOY_HOST=usuario@dominio npm run deploy   # test + build + subir
+node scripts/deploy.mjs --dry-run            # imprime el batch sin conectarse
 ```
+
+El destino vive en el entorno, no en el repositorio:
+
+| variable | por defecto | para qué |
+| --- | --- | --- |
+| `DEPLOY_HOST` | — obligatoria | `usuario@host` de la cuenta de cPanel |
+| `DEPLOY_KEY` | `~/.ssh/expressive-tea-cpanel` | clave privada con la que autenticar |
+| `DEPLOY_REMOTE` | `public_html` | docroot destino dentro de la cuenta |
+
+No es que el usuario de cPanel sea un secreto — la clave privada nunca ha estado aquí y el
+acceso es sólo por clave. Es que escrito en un repositorio público sería la mitad de un par de
+credenciales y un objetivo confirmado, a cambio de nada. Las tres se leen dentro del deploy y
+no al cargar el módulo, para que `--self-test` siga corriendo en CI sin configurar nada.
 
 `scripts/deploy.mjs` recorre `dist/` y genera un batch para `sftp -b`. SSH autentica
 contra esa cuenta pero **el shell está deshabilitado**, así que rsync, tar y cualquier

@@ -14,9 +14,12 @@ import { fileURLToPath } from 'node:url';
 import { join, relative, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 
-const HOST = 'usuario@dominio';
-const KEY = `${process.env.HOME}/.ssh/expressive-tea-cpanel`;
-const REMOTE = 'public_html';
+// El destino sale del entorno, no del repositorio. No es un secreto — la llave privada
+// nunca ha estado aquí y el acceso es sólo por clave — pero un usuario de cPanel escrito
+// en un repo público es la mitad de un par de credenciales y un objetivo confirmado, a
+// cambio de nada. Se leen tarde, dentro del deploy, para que `--self-test` siga corriendo
+// en CI sin necesidad de configurarlas.
+const REMOTE = process.env.DEPLOY_REMOTE ?? 'public_html';
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 
 /**
@@ -85,7 +88,18 @@ if (process.argv.includes('--self-test')) {
   const batch = buildBatch(paths);
   console.log(batch);
   if (!process.argv.includes('--dry-run')) {
-    const r = spawnSync('sftp', ['-i', KEY, '-b', '-', HOST], { input: batch, stdio: ['pipe', 'inherit', 'inherit'] });
+    const host = process.env.DEPLOY_HOST;
+    const key = process.env.DEPLOY_KEY ?? `${process.env.HOME}/.ssh/expressive-tea-cpanel`;
+    if (!host) {
+      console.error('Falta DEPLOY_HOST (usuario@host del cPanel). Ver README.');
+      console.error('  DEPLOY_HOST=usuario@dominio npm run deploy');
+      process.exit(2);
+    }
+    if (!existsSync(key)) {
+      console.error(`No existe la clave ${key}. Pon la ruta en DEPLOY_KEY si vive en otro sitio.`);
+      process.exit(2);
+    }
+    const r = spawnSync('sftp', ['-i', key, '-b', '-', host], { input: batch, stdio: ['pipe', 'inherit', 'inherit'] });
     process.exit(r.status ?? 1);
   }
 }
