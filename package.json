@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "check": "npm test && npm run build",
-    "test": "node scripts/check-redirects.mjs",
+    "test": "node scripts/check-redirects.mjs && node scripts/deploy.mjs --self-test",
+    "deploy": "npm run check && node scripts/deploy.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

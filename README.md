@@ -33,23 +33,42 @@ Every colour, font and asset here traces back to
 
 ## Deploy
 
-cPanel shared hosting, same shape as the other sites in the family: build, tar the contents
-of `dist/`, unpack into the apex docroot (`public_html`).
+cPanel shared hosting, manual, from your own machine:
 
 ```bash
-npm run build
-tar -czf expressive-tea-website.tar.gz -C dist .
+npm run deploy              # test + build + subir
+node scripts/deploy.mjs --dry-run   # imprime el batch sin conectarse
 ```
 
-`public/.htaccess` ships inside `dist/` and carries two things that matter:
+`scripts/deploy.mjs` recorre `dist/` y genera un batch para `sftp -b`. SSH autentica
+contra esa cuenta pero **el shell está deshabilitado**, así que rsync, tar y cualquier
+comando remoto están descartados: SFTP es el único canal. De ahí dos decisiones que el
+script toma a propósito:
 
-- **The redirects.** Until 2026 this domain served the Docusaurus documentation from its web
-  root, because a WordPress failure on `docs.expressive-tea.io` was patched by moving the docs
-  to the apex and never moved back. The docs now live on their own subdomain again, so
-  `/docs/*` and `/community/*` are permanent moves, not 404s.
-- **A warning.** cPanel writes a PHP handler block into the apex `.htaccess` marked
-  *"do not edit"*. It is not reproduced in this repository, so unpacking over the docroot
-  drops it — append it back afterwards, or re-save the PHP version in cPanel.
+- **No borra nada.** Los assets con hash viejos y las páginas que dejaron de existir se
+  quedan en el docroot. Es basura inofensiva, y un borrado a ciegas ahí se llevaría
+  `public_html/.well-known/acme-challenge` — la validación de Let's Encrypt — y con ella
+  la renovación del certificado.
+- **Sube el HTML al final.** No hay swap atómico. Con este orden la ventana de
+  inconsistencia es "HTML viejo, assets nuevos", que nadie nota, en lugar de "HTML nuevo
+  apuntando a assets que no han llegado".
 
-Nothing here is automated yet. There is no GitHub Actions release workflow because there has
-been nothing to release; the sibling repositories have one worth copying when that changes.
+### `.htaccess`, que se sube aparte
+
+El script **no** sube `dist/.htaccess`, y eso no es un descuido. El archivo del servidor
+lleva un bloque de handlers que genera cPanel, marcado *"do not edit"*, que no está en este
+repositorio — y que **difiere por dominio**: el apex es `ea-php81`, el subdominio de docs es
+`ea-php82`. Subir el de `dist/` le cambiaría la versión de PHP al dominio principal en
+silencio. Cuando cambien las redirecciones: baja el `.htaccess` del servidor, pega su bloque
+PHP al final del nuestro, y sube el resultado a mano.
+
+Lo que sí trae nuestro `.htaccess`: hasta 2026 este dominio servía la documentación de
+Docusaurus desde su raíz, porque una falla de WordPress en `docs.expressive-tea.io` se parchó
+moviendo los docs al apex y nunca se revirtió. Los docs ya viven otra vez en su subdominio,
+así que `/docs/*` y `/community/*` son mudanzas permanentes, no 404s. `npm test` verifica
+esas reglas contra el archivo real.
+
+El deploy no está automatizado. Los repositorios hermanos tienen un `release.yml` que vale la
+pena copiar cuando eso cambie — pero la llave SSH autentica como la cuenta completa y puede
+escribir en los tres docroots, así que ese secreto va en la forja que controlas, no en el
+espejo público.
