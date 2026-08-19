@@ -53,10 +53,10 @@ skipped when they are inconvenient.
 Green Tea is in **beta**, and the honest version of that is worth stating rather than
 softening.
 
-Releases carry a `-beta.N` suffix on a calendar version and publish under npm's `beta`
-dist-tag; `26.8.0-beta.0` went out on 3 August 2026. The API can still change between betas,
-and when it does the change is named in the changelog rather than discovered on upgrade.
-Install with the explicit tag:
+Releases carry a `-beta.N` suffix on a calendar version; `26.8.0-beta.1` went out on
+19 August 2026, to npm and to [JSR](https://jsr.io/@green-tea/core). The API can still change
+between betas, and when it does the change is named in the changelog rather than discovered on
+upgrade. Install with the explicit tag:
 
 ```bash
 npm install @green-tea/core@beta
@@ -74,7 +74,7 @@ Tea versions by calendar, so there is no 1.0 milestone on the way to wait for.
 
 ## What is next
 
-The API freeze and that first published release. Beyond it: the mesh sub-specifications
+The API freeze and the first stable release. Beyond them: the mesh sub-specifications
 (discovery, load-balancing, failover), official plugins, and a radix-tree matcher for very
 large route tables.
 
@@ -87,5 +87,6 @@ Green Tea is simply where the new work is.
 [Docs](https://green-tea.expressive-tea.io/docs) ·
 [GitHub](https://github.com/Expressive-Tea/green-tea)
 
-*The engineering story — first person, from the person who wrote it — is on the*
+*The most recent release is covered in* [*Green Tea 26.8.0-beta.1*](/blog/green-tea-26-8-0-beta-1/)*.
+The engineering story — first person, from the person who wrote it — is on the*
 [*Green Tea blog*](https://green-tea.expressive-tea.io/blog/)*.*
