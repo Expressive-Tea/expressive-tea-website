@@ -16,7 +16,7 @@ const frameworks = [
     accent: 'green',
     status: 'beta · actively developed',
     support:
-      'Green Tea is pre-1.0, so the beta releases are the releases — there is no stable line running alongside them. The public surface can still change between betas; when it does, the notes say so and say what to change. Security fixes go into the newest beta, not into older ones: upgrading is the fix.',
+      'Green Tea versions by calendar, so a number tells you when a release shipped, not how many breaking changes came before it — there is no 1.0 on the way to wait for. The channel is what marks the line: betas carry a -beta.N suffix and publish under npm\'s beta dist-tag, the API can still change between them, and every change that breaks is named in the changelog. That channel closes at an API freeze and a first stable release, not at a version number. Until then latest resolves to the newest beta because there is nothing else to install — ask for @beta explicitly anyway, so the day a stable ships you stay on the channel you meant. Only the newest beta gets security fixes; there is no backport channel yet.',
   },
   {
     name: 'Expressive Tea',
