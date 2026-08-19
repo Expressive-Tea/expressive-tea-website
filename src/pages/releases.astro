@@ -1,0 +1,293 @@
+---
+import Base from '../layouts/Base.astro';
+
+const title = 'Releases — Expressive Tea Software';
+const description =
+  'Release notes for Green Tea and Expressive Tea, pulled from GitHub at build time, with what each framework is still supported for.';
+
+// The support policy is editorial, not something GitHub knows. A release list alone cannot
+// tell a reader whether the newest version is the one being developed or the one being kept
+// alive — and for a framework in maintenance that is the only question that matters.
+const frameworks = [
+  {
+    name: 'Green Tea',
+    slug: 'green-tea',
+    repo: 'Expressive-Tea/green-tea',
+    accent: 'green',
+    status: 'beta · actively developed',
+    support:
+      'Green Tea is pre-1.0, so the beta releases are the releases — there is no stable line running alongside them. The public surface can still change between betas; when it does, the notes say so and say what to change. Security fixes go into the newest beta, not into older ones: upgrading is the fix.',
+  },
+  {
+    name: 'Expressive Tea',
+    slug: 'expressive-tea',
+    repo: 'Expressive-Tea/expresive-tea',
+    accent: 'blue',
+    status: 'stable · security fixes only',
+    support:
+      'Expressive Tea is finished. The 2.0.x line still receives security patches and dependency updates, and nothing else — no new features, and no fixes for anything that is merely inconvenient. Everything below 2.0 is unsupported, and 1.3.x Beta must not be used at all: it shipped a critical flaw in the Teapot/Teacup gateway encryption and was never promoted to a release.',
+  },
+];
+
+// GitHub renders the notes for us when asked for the html media type, which is the whole
+// reason this page needs no Markdown library. The HTML comes back through GitHub's own
+// sanitizer, and the authors are us, so it is safe to inject — see the `set:html` below.
+// A token is optional: it only exists to raise the rate limit when CI shares an IP.
+const token = process.env.GITHUB_TOKEN;
+
+async function releasesOf(repo) {
+  const res = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`, {
+    headers: {
+      Accept: 'application/vnd.github.html+json',
+      'User-Agent': 'expressive-tea-website',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  // Deliberately fatal. A releases page that silently ships empty because the network
+  // hiccuped is worse than a build that stops and tells you.
+  if (!res.ok) throw new Error(`GitHub returned ${res.status} for ${repo}: ${await res.text()}`);
+  return (await res.json())
+    .filter((r) => !r.draft)
+    .map((r) => ({
+      tag: r.tag_name,
+      url: r.html_url,
+      prerelease: r.prerelease,
+      published: r.published_at,
+      bodyHtml: r.body_html?.trim() || '',
+    }));
+}
+
+const sections = await Promise.all(
+  frameworks.map(async (f) => {
+    const releases = await releasesOf(f.repo);
+    // GitHub's own "Latest" badge skips prereleases, so this does too. When every release
+    // is a prerelease — which is Green Tea today — nothing is marked, which is correct.
+    const latest = releases.find((r) => !r.prerelease)?.tag;
+    return { ...f, releases, latest };
+  }),
+);
+
+const fmt = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<Base title={title} description={description}>
+  <section class="wrap release-head">
+    <p class="kicker">Releases</p>
+    <h1>What shipped, and what is still supported.</h1>
+    <div class="rule"></div>
+    <div class="measure">
+      <p class="lede">
+        These notes are pulled from GitHub when this page is built, so they are the same text
+        attached to each tag — not a summary of it. The support line above each list is ours.
+      </p>
+      <p class="release-head__sec">
+        Found something exploitable? Mail <a href="mailto:security@expressive-tea.io"
+          >security@expressive-tea.io</a
+        > rather than opening an issue. An issue is world-readable the moment you press the button.
+      </p>
+    </div>
+  </section>
+
+  {
+    sections.map((s) => (
+      <section class="wrap release-section" id={s.slug}>
+        <header class={`release-section__head accent-${s.accent}`}>
+          <h2>{s.name}</h2>
+          <span class="chip">{s.status}</span>
+        </header>
+        <p class="release-section__support">{s.support}</p>
+
+        {s.releases.length === 0 ? (
+          <p class="release-empty">
+            No releases published on GitHub yet. The tags exist, but a tag carries no notes —
+            follow{' '}
+            <a href={`https://github.com/${s.repo}/tags`} target="_blank" rel="noopener noreferrer">
+              the tag list
+            </a>{' '}
+            until the first release is cut.
+          </p>
+        ) : (
+          <ol class="release-list">
+            {s.releases.map((r) => (
+              <li class="release">
+                <div class="release__meta">
+                  <a class="release__tag" href={r.url} target="_blank" rel="noopener noreferrer">
+                    {r.tag}
+                  </a>
+                  {r.tag === s.latest && <span class="badge badge--latest">latest</span>}
+                  {r.prerelease && <span class="badge badge--pre">pre-release</span>}
+                  {r.published && (
+                    <time datetime={r.published}>{fmt.format(new Date(r.published))}</time>
+                  )}
+                </div>
+                {r.bodyHtml ? (
+                  <div class="release__notes" set:html={r.bodyHtml} />
+                ) : (
+                  <p class="release__notes release__notes--empty">
+                    This release was published without notes.
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .release-head {
+    padding-block: 4rem 1rem;
+  }
+  .release-head h1 {
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    line-height: 1.15;
+    margin: 0.35rem 0 1.1rem;
+  }
+  .release-head__sec {
+    color: var(--meta);
+    font-size: 0.95rem;
+  }
+  .release-section {
+    padding-block: 2.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .release-section__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .release-section__head h2 {
+    font-size: 1.6rem;
+    margin: 0;
+  }
+  .accent-green h2 {
+    color: var(--green);
+  }
+  .accent-blue h2 {
+    color: var(--blue);
+  }
+  .chip,
+  .badge {
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--meta);
+    white-space: nowrap;
+  }
+  .release-section__support {
+    color: var(--cool);
+    margin: 0.9rem 0 0;
+    max-width: 68ch;
+  }
+  .release-empty {
+    color: var(--meta);
+    margin-top: 1.5rem;
+  }
+  .release-list {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+  }
+  .release + .release {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .release__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .release__tag {
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-decoration: none;
+  }
+  .release__meta time {
+    color: var(--meta);
+    font-size: 0.9rem;
+  }
+  .badge--latest {
+    color: var(--green);
+    border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  }
+  .badge--pre {
+    color: var(--teal);
+    border-color: color-mix(in srgb, var(--teal) 45%, transparent);
+  }
+  .release__notes {
+    margin-top: 1rem;
+    max-width: 68ch;
+    color: var(--cool);
+  }
+  .release__notes--empty {
+    color: var(--meta);
+    font-style: italic;
+  }
+
+  /* Everything below styles HTML that GitHub rendered, so it is reached through :global().
+     Release notes are written by whoever cut the release and use whatever headings they
+     felt like — the rules stay generic on purpose. */
+  .release__notes :global(h1),
+  .release__notes :global(h2),
+  .release__notes :global(h3),
+  .release__notes :global(h4) {
+    font-size: 1.02rem;
+    color: var(--white);
+    margin: 1.5rem 0 0.5rem;
+  }
+  .release__notes :global(p),
+  .release__notes :global(ul),
+  .release__notes :global(ol) {
+    margin: 0.6rem 0;
+  }
+  .release__notes :global(li) {
+    margin: 0.25rem 0;
+  }
+  .release__notes :global(code) {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+  }
+  .release__notes :global(pre) {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+  }
+  .release__notes :global(pre code) {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+  .release__notes :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+  .release__notes :global(table) {
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+  .release__notes :global(th),
+  .release__notes :global(td) {
+    border: 1px solid var(--line);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+  }
+  .release__notes :global(blockquote) {
+    margin: 0.8rem 0;
+    padding-left: 0.9rem;
+    border-left: 3px solid var(--line);
+    color: var(--meta);
+  }
+</style>

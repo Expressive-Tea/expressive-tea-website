@@ -1,8 +1,10 @@
 name: CI
 
 # Build gate. Runs on both forges (the .github path is read by Gitea and GitHub).
-# Deliberately holds no secrets: nothing here talks to the server, so a fork or a
-# pull request can run it without touching anything that can be lost.
+# Deliberately holds no stored secrets: nothing here talks to the server, so a fork or
+# a pull request can run it without touching anything that can be lost. The GITHUB_TOKEN
+# below is not one of those — the forge mints it per run, forks included, and it only
+# raises the API rate limit for the release notes the build fetches.
 on:
   pull_request:
     branches: [main]
@@ -23,8 +25,24 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=moderate
       - run: npm run check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       # The .htaccess is the only file here that can break URLs older than the site,
       # and it is the one file a build cannot check by rendering. It ships inside
       # dist/ or the redirects silently stop existing.
       - name: Verify .htaccess ships in the build
         run: test -f dist/.htaccess
+      # The release notes come from a network call at build time, so the page can build
+      # perfectly while saying nothing. This catches the two silent failures: an API that
+      # answers 200 with an empty list, and notes that arrive stripped of their rendered
+      # body because the html media type stopped being honoured.
+      #
+      # Both greps deliberately match rendered text rather than class names. Astro inlines
+      # the scoped stylesheet into the page, so a class name matches its own CSS rule and
+      # the check passes — or fails — on nothing at all.
+      - name: Verify the releases page carries notes
+        run: |
+          tags=$(grep -o 'releases/tag/' dist/releases/index.html | wc -l)
+          bare=$(grep -o 'was published without notes' dist/releases/index.html | wc -l)
+          echo "$tags releases rendered, $bare of them without notes"
+          test "$tags" -ge 1 && test "$bare" -lt "$tags"
