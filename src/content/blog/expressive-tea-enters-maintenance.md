@@ -1,7 +1,7 @@
 ---
 title: 'Expressive Tea 2.0.1, and what maintenance means from here'
 description: 'The 2.0 line is where Expressive Tea stops adding and starts holding. What still gets patched, what never will, and which version you should not be running.'
-pubDate: 2026-08-19
+pubDate: 2026-08-19T11:00:00Z
 subject: expressive-tea
 ---
 

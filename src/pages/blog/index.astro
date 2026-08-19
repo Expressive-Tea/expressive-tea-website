@@ -8,9 +8,13 @@ const description =
 
 // Drafts are excluded from the build, not hidden with CSS: an unlisted page is still a
 // public URL, and "unreleased" is exactly the thing that must not be one.
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+// Newest first, then by id. The tiebreak is not cosmetic: two posts sharing a timestamp
+// would otherwise fall back to whatever order the loader's glob returned, which is not
+// guaranteed to be the same on the build machine as it is in CI.
+const byDateThenId = (a, b) =>
+  b.data.pubDate.valueOf() - a.data.pubDate.valueOf() || a.id.localeCompare(b.id);
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDateThenId);
 
 const subjects = {
   'green-tea': 'Green Tea',
