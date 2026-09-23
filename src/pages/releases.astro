@@ -54,7 +54,33 @@ async function releasesOf(repo) {
       prerelease: r.prerelease,
       published: r.published_at,
       bodyHtml: r.body_html?.trim() || '',
+      excerpt: excerptOf(r.body_html || ''),
     }));
+}
+
+// The opening paragraph, as plain text, for the collapsed state. Text rather than HTML on
+// purpose: an excerpt carrying GitHub's markup would drag links into a line that exists to be
+// skimmed, and a link the reader cannot see the target of is worse than no link.
+//
+// ponytail: a regex over the first <p>, not a parser. This is GitHub's own rendered output,
+// already through their sanitizer, and our releases open with prose. If a release ever opens
+// with a table or an image, the match simply fails and the entry renders with no excerpt —
+// degraded, not broken. Reach for a parser when that stops being acceptable.
+function excerptOf(html) {
+  const paragraph = /<p>([\s\S]*?)<\/p>/i.exec(html);
+  if (!paragraph) return '';
+  const text = paragraph[1]
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+  // Cut on a word boundary so the clamp never ends mid-word when CSS is unavailable.
+  if (text.length <= 320) return text;
+  return `${text.slice(0, 320).replace(/\s+\S*$/, '')}…`;
 }
 
 const sections = await Promise.all(
@@ -67,14 +93,18 @@ const sections = await Promise.all(
   }),
 );
 
-// Formatted in UTC, not in the builder's zone. A date-only front-matter value parses as
-// UTC midnight, so any negative offset renders it a day early — and worse, the same commit
-// would produce different HTML on a laptop in CST than in CI, which runs in UTC.
+// Pinned to the project's own zone rather than to the builder's. The determinism this was
+// written for still holds — a fixed zone renders the same HTML on a laptop and in CI, which
+// runs in UTC — but UTC was the wrong fixed zone to pick. GitHub's `published_at` is an
+// instant, and an evening release here lands after midnight there: v26.9.0-beta.2 published
+// at 21:04 on 22 September and this page dated it the 23rd, while the tag, the changelog and
+// the announcement all said the 22nd. The releases are cut from this zone, so it is the one
+// that agrees with everything else we write about them.
 const fmt = new Intl.DateTimeFormat('en', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
-  timeZone: 'UTC',
+  timeZone: 'America/Chicago',
 });
 ---
 
@@ -115,29 +145,50 @@ const fmt = new Intl.DateTimeFormat('en', {
             until the first release is cut.
           </p>
         ) : (
-          <ol class="release-list">
-            {s.releases.map((r) => (
-              <li class="release">
-                <div class="release__meta">
-                  <a class="release__tag" href={r.url} target="_blank" rel="noopener noreferrer">
-                    {r.tag}
-                  </a>
-                  {r.tag === s.latest && <span class="badge badge--latest">latest</span>}
-                  {r.prerelease && <span class="badge badge--pre">pre-release</span>}
-                  {r.published && (
-                    <time datetime={r.published}>{fmt.format(new Date(r.published))}</time>
+          <>
+            {s.releases.length > 1 && (
+              <nav class="release-toc" aria-label={`${s.name} releases`}>
+                <ol>
+                  {s.releases.map((r) => (
+                    <li>
+                      <a href={`#${s.slug}-${r.tag}`}>{r.tag}</a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+            <ol class="release-list">
+              {s.releases.map((r) => (
+                <li class="release" id={`${s.slug}-${r.tag}`}>
+                  <div class="release__meta">
+                    <a class="release__tag" href={r.url} target="_blank" rel="noopener noreferrer">
+                      {r.tag}
+                    </a>
+                    {r.tag === s.latest && <span class="badge badge--latest">latest</span>}
+                    {r.prerelease && <span class="badge badge--pre">pre-release</span>}
+                    {r.published && (
+                      <time datetime={r.published}>{fmt.format(new Date(r.published))}</time>
+                    )}
+                  </div>
+                  {r.bodyHtml ? (
+                    <div class="release__body">
+                      {r.excerpt && <p class="release__excerpt">{r.excerpt}</p>}
+                      {/* Native disclosure, so expanding needs no JavaScript: it is keyboard
+                          operable, and a browser with scripting off still opens it. */}
+                      <details class="release__disclosure">
+                        <summary>Release notes</summary>
+                        <div class="release__notes" set:html={r.bodyHtml} />
+                      </details>
+                    </div>
+                  ) : (
+                    <p class="release__notes release__notes--empty">
+                      This release was published without notes.
+                    </p>
                   )}
-                </div>
-                {r.bodyHtml ? (
-                  <div class="release__notes" set:html={r.bodyHtml} />
-                ) : (
-                  <p class="release__notes release__notes--empty">
-                    This release was published without notes.
-                  </p>
-                )}
-              </li>
-            ))}
-          </ol>
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </section>
     ))
@@ -228,6 +279,65 @@ const fmt = new Intl.DateTimeFormat('en', {
   .badge--pre {
     color: var(--teal);
     border-color: color-mix(in srgb, var(--teal) 45%, transparent);
+  }
+  .release-toc {
+    margin-top: 1.5rem;
+  }
+  .release-toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .release-toc a {
+    display: inline-block;
+    font-size: 0.82rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--meta);
+    text-decoration: none;
+  }
+  .release-toc a:hover,
+  .release-toc a:focus-visible {
+    color: var(--white);
+    border-color: color-mix(in srgb, var(--white) 35%, transparent);
+  }
+  /* The anchor targets sit in a list; without this a jump parks the heading against the
+     viewport edge with no room to read it. */
+  .release {
+    scroll-margin-top: 1.5rem;
+  }
+  .release__body {
+    margin-top: 1rem;
+    max-width: 68ch;
+  }
+  .release__excerpt {
+    margin: 0;
+    color: var(--cool);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Once the notes are open the excerpt is the first thing they say, so it stops earning its
+     line. Browsers without :has() keep it, which costs a repeated sentence and nothing else. */
+  .release__body:has(.release__disclosure[open]) .release__excerpt {
+    display: none;
+  }
+  .release__disclosure > summary {
+    margin-top: 0.7rem;
+    cursor: pointer;
+    color: var(--meta);
+    font-size: 0.9rem;
+    width: fit-content;
+  }
+  .release__disclosure > summary:hover,
+  .release__disclosure > summary:focus-visible {
+    color: var(--white);
   }
   .release__notes {
     margin-top: 1rem;
