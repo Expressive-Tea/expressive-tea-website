@@ -14,9 +14,9 @@ const frameworks = [
     slug: 'green-tea',
     repo: 'Expressive-Tea/green-tea',
     accent: 'green',
-    status: 'beta · actively developed',
+    status: 'release candidate · API frozen',
     support:
-      'Green Tea versions by calendar, so a number tells you when a release shipped, not how many breaking changes came before it — there is no 1.0 on the way to wait for. The channel is what marks the line: betas carry a -beta.N suffix and publish under npm\'s beta dist-tag, the API can still change between them, and every change that breaks is named in the changelog. That channel closes at an API freeze and a first stable release, not at a version number. Until then latest resolves to the newest beta because there is nothing else to install — ask for @beta explicitly anyway, so the day a stable ships you stay on the channel you meant. Only the newest beta gets security fixes; there is no backport channel yet.',
+      'Green Tea versions by calendar, so a number tells you when a release shipped, not how many breaking changes came before it — there is no 1.0 on the way to wait for. The API froze at 26.11.0-rc.1: until the first stable release, releases are fixes only, and only the latest release candidate gets them. Install with @rc. After stable, breaking changes ship only in the first release of a year, the latest monthly release gets bug and security fixes, and the one before it gets security fixes for three months.',
   },
   {
     name: 'Expressive Tea',
